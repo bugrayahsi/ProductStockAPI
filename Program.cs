@@ -1,9 +1,12 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
+using Microsoft.EntityFrameworkCore;
+using ProductStockAPI.Data;
 using ProductStockAPI.Repositories;
 using ProductStockAPI.Repositories.Interfaces;
 using ProductStockAPI.Services;
 using ProductStockAPI.Services.Interfaces;
-using Microsoft.EntityFrameworkCore;
-using ProductStockAPI.Data;
+using ProductStockAPI.Validators;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -12,6 +15,8 @@ builder.Services.AddDbContext<AppDbContext>(options =>
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateProductDtoValidator>();
+builder.Services.AddFluentValidationAutoValidation();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
