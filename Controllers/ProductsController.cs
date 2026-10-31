@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
 using ProductStockAPI.DTOs.Products;
 using ProductStockAPI.Models;
 using ProductStockAPI.Services.Interfaces;
@@ -10,10 +11,14 @@ namespace ProductStockAPI.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _service;
+        private readonly IMapper _mapper;
 
-        public ProductsController(IProductService service)
+        public ProductsController(
+            IProductService service,
+            IMapper mapper)
         {
             _service = service;
+            _mapper = mapper;
         }
 
         [HttpGet]
@@ -21,13 +26,7 @@ namespace ProductStockAPI.Controllers
         {
             var products = await _service.GetAllAsync();
 
-            var productDtos = products.Select(product => new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity
-            }).ToList();
+            var productDtos = _mapper.Map<List<ProductDto>>(products);
 
             return Ok(productDtos);
         }
@@ -36,22 +35,11 @@ namespace ProductStockAPI.Controllers
         public async Task<ActionResult<ProductDto>> AddProduct(
             CreateProductDto createDto)
         {
-            var product = new Product
-            {
-                Name = createDto.Name,
-                Price = createDto.Price,
-                StockQuantity = createDto.StockQuantity
-            };
+            var product = _mapper.Map<Product>(createDto);
 
             var addedProduct = await _service.AddAsync(product);
 
-            var productDto = new ProductDto
-            {
-                Id = addedProduct.Id,
-                Name = addedProduct.Name,
-                Price = addedProduct.Price,
-                StockQuantity = addedProduct.StockQuantity
-            };
+            var productDto = _mapper.Map<ProductDto>(addedProduct);
 
             return CreatedAtAction(
                 nameof(GetProducts),
@@ -63,12 +51,7 @@ namespace ProductStockAPI.Controllers
         public async Task<ActionResult<ProductDto>> UpdateProduct(
             int id, UpdateProductDto updateDto)
         {
-            var updatedProduct = new Product
-            {
-                Name = updateDto.Name,
-                Price = updateDto.Price,
-                StockQuantity = updateDto.StockQuantity
-            };
+            var updatedProduct = _mapper.Map<Product>(updateDto);
 
             var product = await _service.UpdateAsync(id, updatedProduct);
 
@@ -77,13 +60,7 @@ namespace ProductStockAPI.Controllers
                 return NotFound();
             }
 
-            var productDto = new ProductDto
-            {
-                Id = product.Id,
-                Name = product.Name,
-                Price = product.Price,
-                StockQuantity = product.StockQuantity
-            };
+            var productDto = _mapper.Map<ProductDto>(product);
 
             return Ok(productDto);
         }
